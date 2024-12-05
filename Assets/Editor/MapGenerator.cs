@@ -5,7 +5,6 @@ public class MapGenerator : EditorWindow
 {
     private Vector3Int MapDimensions = new Vector3Int(10,10,10);
     private int MapSeed = 136442497;
-    private float MapThreshold = 0.5f;
     private int MapScale = 5;
     private float PointOffset = 5;
     private Map GeneratedMap;
@@ -27,8 +26,8 @@ public class MapGenerator : EditorWindow
             {
                 for (int z = 0; z < MapDimensions.z; z++)
                 {
-                    float crtHeight = MapDimensions.z * Mathf.PerlinNoise((float)x / MapScale + MapOffset.x,
-                                                                          (float)z /  MapScale+MapOffset.y);
+                    float crtHeight = MapDimensions.y * Mathf.PerlinNoise((float)x / MapScale + MapOffset.x,
+                                                                          (float)z /  MapScale + MapOffset.y);
                     if (y>crtHeight)
                     {
                         GeneratedMap.MapPoints[x,y,z] = y - crtHeight;
@@ -36,6 +35,10 @@ public class MapGenerator : EditorWindow
                     else
                     {
                         GeneratedMap.MapPoints[x,y,z] = crtHeight - y;
+                    }
+                    if (GeneratedMap.MapPoints[x,y,z]>1f)
+                    {
+                        GeneratedMap.MapPoints[x, y, z] = 1f;
                     }
                 }
             }
@@ -46,15 +49,14 @@ public class MapGenerator : EditorWindow
     {
         MapDimensions = EditorGUILayout.Vector3IntField("Dimensions", MapDimensions);
         MapSeed = EditorGUILayout.IntField("Seed", MapSeed);
-        MapThreshold = EditorGUILayout.Slider("Threshold", MapThreshold, .0f, 1f);
         MapScale = EditorGUILayout.IntField("Scale", MapScale);
         PointOffset = EditorGUILayout.FloatField("Point offset", PointOffset);
         GeneratedMap = EditorGUILayout.ObjectField("Map", GeneratedMap, typeof(Map), true) as Map;
         
         if (GUILayout.Button("Generate map"))
         {
-            Random.InitState(MapSeed);
-            MapOffset = new Vector2(Random.Range(0, 999999f), Random.Range(0, 999999f));
+            RNG.SetSeed(MapSeed);
+            MapOffset = new Vector2(RNG.Rand(0, 999999), RNG.Rand(0, 999999));
             if (MapDimensions.x <= 0 || MapDimensions.y <= 0 || MapDimensions.z <= 0)
             {
                 Debug.Log("<color=red>WARNING: All map dimensions must be higher than 0</color>");

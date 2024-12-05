@@ -6,6 +6,7 @@ public class Map : MonoBehaviour
 {
     public Vector3Int Dimensions = new Vector3Int(0,0,0);
     public float[,,] MapPoints = new float[0,0,0];
+    [SerializeField][Range(0f, 1f)] float Threshold = 1;
 
     public bool IsVisible = false;
     // Start is called before the first frame update
@@ -19,7 +20,7 @@ public class Map : MonoBehaviour
     {
         
     }
-    void OnDrawGizmos()
+    void OnDrawGizmosSelected()
     {
         if(!IsVisible || Dimensions == Vector3Int.zero )
             return;
@@ -29,10 +30,11 @@ public class Map : MonoBehaviour
             for (int y = 0; y < Dimensions.y; y++)
             {
                 for (int z = 0; z < Dimensions.z; z++)
-                {
-                    Gizmos.color = new Color(MapPoints[x, y, z],MapPoints[x, y, z],MapPoints[x, y, z]);
-                    Gizmos.DrawSphere(new Vector3(x,y,z),0.2f);
-                }
+                    if(MapPoints[x,y,z]<=Threshold)
+                    {
+                        Gizmos.color = new Color(MapPoints[x, y, z],MapPoints[x, y, z],MapPoints[x, y, z]);
+                        Gizmos.DrawSphere(new Vector3(x,y,z),0.2f);
+                    }
             }
         }
     }

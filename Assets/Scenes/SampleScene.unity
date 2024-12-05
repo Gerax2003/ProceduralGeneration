@@ -340,7 +340,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rangeMin: 0
   rangeMax: 1000
-  iterations: 256000
+  iterations: 1
 --- !u!4 &994336716
 Transform:
   m_ObjectHideFlags: 0
@@ -385,7 +385,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 818c4b0bad66d2e4cb34edcebfd433fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Dimensions: {x: 15, y: 15, z: 15}
+  Dimensions: {x: 20, y: 10, z: 20}
+  Threshold: 0.5
   IsVisible: 1
 --- !u!4 &1305370933
 Transform:
