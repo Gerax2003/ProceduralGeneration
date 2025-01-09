@@ -1,15 +1,33 @@
-using System.Collections;
+
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TreeVolume : MonoBehaviour
 {
-    public Vector3[] points;
+    [HideInInspector]
+    public List<Vector3> points = new List<Vector3>();
 
-    protected int pointsNum;
+    [SerializeField]
+    public int pointsNum;
 
-    virtual public void InitPoints()
+    [SerializeField]
+    bool showPoints = true;
+
+    virtual public void InitPoints(){}
+
+    virtual protected void DrawVolumeGizmo(){}
+
+    public void OnDrawGizmosSelected()
     {
-        points = new Vector3[pointsNum];
+        DrawVolumeGizmo();
+
+        if (points.Count <= 0 || !showPoints)
+            return;
+
+        foreach (Vector3 point in points) 
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(point, 0.1f);
+        }
     }
 }
