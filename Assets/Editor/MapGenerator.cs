@@ -6,7 +6,6 @@ public class MapGenerator : EditorWindow
     private Vector3Int MapDimensions = new Vector3Int(10,10,10);
     private int MapSeed = 136442497;
     private int MapScale = 5;
-    private float PointOffset = 5;
     private Map GeneratedMap;
     private Vector2 MapOffset;
 
@@ -20,11 +19,11 @@ public class MapGenerator : EditorWindow
     {
         GeneratedMap.Dimensions = MapDimensions;
         GeneratedMap.MapPoints = new float[MapDimensions.x + 1, MapDimensions.y + 1, MapDimensions.z + 1];
-        for (int x = 0; x < MapDimensions.x; x++)
+        for (int x = 0; x < MapDimensions.x + 1; x++)
         {
-            for (int y = 0; y < MapDimensions.y; y++)
+            for (int y = 0; y < MapDimensions.y + 1; y++)
             {
-                for (int z = 0; z < MapDimensions.z; z++)
+                for (int z = 0; z < MapDimensions.z + 1; z++)
                 {
                     float crtHeight = MapDimensions.y * Mathf.PerlinNoise((float)x / MapScale + MapOffset.x,
                                                                           (float)z /  MapScale + MapOffset.y);
@@ -50,7 +49,6 @@ public class MapGenerator : EditorWindow
         MapDimensions = EditorGUILayout.Vector3IntField("Dimensions", MapDimensions);
         MapSeed = EditorGUILayout.IntField("Seed", MapSeed);
         MapScale = EditorGUILayout.IntField("Scale", MapScale);
-        PointOffset = EditorGUILayout.FloatField("Point offset", PointOffset);
         GeneratedMap = EditorGUILayout.ObjectField("Map", GeneratedMap, typeof(Map), true) as Map;
         
         if (GUILayout.Button("Generate map"))

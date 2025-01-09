@@ -13,12 +13,13 @@ public class Map : MonoBehaviour
     [SerializeField][Range(0f, 1f)] float Threshold = 1;
 
     private List<Vector3> Vertices = new List<Vector3>();
-    private List<int> triangle = new List<int>();
+    private List<int> triangles = new List<int>();
     
     public bool IsVisible = false;
     // Start is called before the first frame update
     void Start()
     {
+        Dimensions = new Vector3Int(0,0,0);
         Mf = GetComponent<MeshFilter>();
         StartCoroutine(UpdateMap());
     }
@@ -27,22 +28,23 @@ public class Map : MonoBehaviour
     {
         while (true)
         {
-            MarchCube();
+            MarchingCube();
             SetMesh();
             yield return new WaitForSeconds(1);
         }
     }
 
-    void MarchCube()
+    void MarchingCube()
     {
-        triangle.Clear();
+        
+        triangles.Clear();
         Vertices.Clear();
 
-        for (int x = 0; x < Dimensions.x - 1; x++)
+        for (int x = 0; x < Dimensions.x; x++)
         {
-            for (int y = 0; y < Dimensions.y - 1; y++)
+            for (int y = 0; y < Dimensions.y; y++)
             {
-                for (int z = 0; z < Dimensions.z - 1; z++)
+                for (int z = 0; z < Dimensions.z; z++)
                 {
                     float[] Corners = new float[8];
                     for (int i = 0; i < 8; i++)
@@ -58,7 +60,29 @@ public class Map : MonoBehaviour
 
     void MarchCube(Vector3 pos, int configID)
     {
-        
+        if (configID == 0 || configID == 255)
+            return;
+        int edgeID = 0;
+        for (int t = 0; t < 5; t++) //t stands for Triangles
+        {
+            for (int v = 0; v < 3; v++) //v stands for Vertices
+            {
+                int trisTableValue = MarchingTable.Triangles[configID, edgeID];
+
+                if (trisTableValue == -1)
+                    return;
+
+                Vector3 edgeStart = pos + MarchingTable.Edges[trisTableValue, 0];
+                Vector3 edgeEnd = pos + MarchingTable.Edges[trisTableValue, 1];
+
+                Vector3 vertex = (edgeStart + edgeEnd) / 2;
+                
+                Vertices.Add(vertex);
+                triangles.Add(Vertices.Count - 1);
+                
+                edgeID++;
+            }
+        }
     }
 
     private int GetConfigIndex(float[] corners)
@@ -79,6 +103,11 @@ public class Map : MonoBehaviour
     void SetMesh()
     {
         Mesh mesh = new Mesh();
+        mesh.vertices = Vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.RecalculateNormals();
+
+        Mf.mesh = mesh;
     }
 
     // Update is called once per frame
