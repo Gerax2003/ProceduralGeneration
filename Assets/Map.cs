@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,34 +12,31 @@ public class Map : MonoBehaviour
     public float[,,] MapPoints = new float[0,0,0];
     private MeshFilter Mf;
     private MeshCollider Mc;
-    [SerializeField][Range(0f, 1f)] float Threshold = 1;
+    [SerializeField][Range(0f, 0.9999f)] float Threshold = 0.9999f;
 
     private List<Vector3> Vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     
     public bool IsVisible = false;
-    // Start is called before the first frame update
-    void Start()
+    public bool MapBuilt = false;
+
+    private void OnValidate()
     {
-        Dimensions = new Vector3Int(0,0,0);
-        Mf = GetComponent<MeshFilter>();
-        Mc = GetComponent < MeshCollider>();
-        StartCoroutine(UpdateMap());
+        UpdateMap();
     }
 
-    IEnumerator UpdateMap()
+    public void UpdateMap()
     {
-        while (true)
-        {
-            MarchingCube();
-            SetMesh();
-            yield return new WaitForSeconds(1);
-        }
+        if (MapBuilt)
+            return;
+        MarchingCube(); 
+        SetMesh();
+        
+        MapBuilt = true;
     }
 
     void MarchingCube()
     {
-        
         triangles.Clear();
         Vertices.Clear();
 
@@ -93,7 +91,7 @@ public class Map : MonoBehaviour
         
         for (int i = 0; i < 8; i++)
         {
-            if (corners[i] > 0.5f)
+            if (corners[i] > Threshold)
             {
                 index |= 1 << i;
             }
@@ -104,6 +102,12 @@ public class Map : MonoBehaviour
 
     void SetMesh()
     {
+        //Ensures mesh filter and collider are present in the script
+        if(!Mf)
+            Mf = GetComponent<MeshFilter>();
+        if(!Mc)
+            Mc = GetComponent < MeshCollider>();
+        
         Mesh mesh = new Mesh();
         mesh.vertices = Vertices.ToArray();
         mesh.triangles = triangles.ToArray();
@@ -112,12 +116,7 @@ public class Map : MonoBehaviour
         Mf.mesh = mesh;
         Mc.sharedMesh = mesh;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
     void OnDrawGizmos()
     {
         bool b =
@@ -138,7 +137,7 @@ public class Map : MonoBehaviour
                     if(MapPoints[x,y,z]<=Threshold)
                     {
                         Gizmos.color = new Color(MapPoints[x, y, z],MapPoints[x, y, z],MapPoints[x, y, z]);
-                        Gizmos.DrawSphere(new Vector3(x,y,z),0.2f);
+                        Gizmos.DrawSphere(new Vector3(x,y,z),0.1f);
                     }
             }
         }

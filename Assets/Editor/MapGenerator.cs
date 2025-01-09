@@ -14,34 +14,33 @@ public class MapGenerator : EditorWindow
     {
         GetWindow(typeof(MapGenerator));
     }
-
+    
     private void GenerateMap()
     {
         GeneratedMap.Dimensions = MapDimensions;
         GeneratedMap.MapPoints = new float[MapDimensions.x + 1, MapDimensions.y + 1, MapDimensions.z + 1];
-        for (int x = 0; x < MapDimensions.x + 1; x++)
+        for (int x = 0; x <= MapDimensions.x; x++)
         {
-            for (int y = 0; y < MapDimensions.y + 1; y++)
+            for (int y = 0; y <= MapDimensions.y; y++)
             {
-                for (int z = 0; z < MapDimensions.z + 1; z++)
+                for (int z = 0; z <= MapDimensions.z; z++)
                 {
                     float crtHeight = MapDimensions.y * Mathf.PerlinNoise((float)x / MapScale + MapOffset.x,
                                                                           (float)z /  MapScale + MapOffset.y);
-                    if (y>crtHeight)
-                    {
-                        GeneratedMap.MapPoints[x,y,z] = y - crtHeight;
-                    }
-                    else
-                    {
-                        GeneratedMap.MapPoints[x,y,z] = crtHeight - y;
-                    }
-                    if (GeneratedMap.MapPoints[x,y,z]>1f)
-                    {
+                    if (y <= crtHeight - .5f)
+                        GeneratedMap.MapPoints[x, y, z] = 0f;
+                    else if (y > crtHeight + .5f)
                         GeneratedMap.MapPoints[x, y, z] = 1f;
-                    }
+                    else if (y > crtHeight)
+                        GeneratedMap.MapPoints[x, y, z] = y - crtHeight;
+                    else
+                        GeneratedMap.MapPoints[x, y, z] = crtHeight - y;
                 }
             }
         }
+
+        GeneratedMap.MapBuilt = false;
+        GeneratedMap.UpdateMap();
     }
 
     private void OnGUI()
