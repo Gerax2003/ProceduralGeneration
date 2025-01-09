@@ -15,6 +15,9 @@ public class TreeGenerator : MonoBehaviour
 
     // Generator Variables
     [SerializeField]
+    bool showGizmos = true;
+
+    [SerializeField]
     int maxIter = 1000;
 
     [SerializeField]
@@ -300,6 +303,9 @@ public class TreeGenerator : MonoBehaviour
 
     public void OnDrawGizmosSelected()
     {
+        if (!showGizmos)
+            return;
+
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(startOffset + transform.position, new Vector3(0.15f, 0.15f, 0.15f));
 
