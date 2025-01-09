@@ -1,12 +1,11 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 
-[RequireComponent(typeof(TreeVolume))]
+[RequireComponent(typeof(TreeVolume), typeof(MeshFilter))]
 public class TreeGenerator : MonoBehaviour
 {
     TreeVolume treeVolume = null;
@@ -32,10 +31,20 @@ public class TreeGenerator : MonoBehaviour
     int cylinderSections = 6;
 
     [SerializeField]
-    float meshRadius = 0.1f;
+    float endBranchRadius = 0.1f;
+
+    [SerializeField]
+    float reverseGrowthFactor = 1.5f;
 
     [SerializeField]
     Vector3 startOffset = Vector3.zero;
+
+    [SerializeField]
+    Material mat = null;
+
+    Mesh treeMesh;
+
+    MeshFilter filter;
 
     Vector3 startPos = Vector3.zero;
 
@@ -169,12 +178,39 @@ public class TreeGenerator : MonoBehaviour
         yield break;
     }
 
-    void CreateMesh()
+    void ComputeBranchSizes()
     {
+        float inverseFactor = 1f / reverseGrowthFactor; // avoids computing on every branch
+
+        // Start from the end, calculate current branch size based on child branches size
+        for (int i = tree.Count - 1; i >= 0; i--) 
+        {
+            if (tree[i].children.Count <= 0)
+            {
+                tree[i].size = endBranchRadius;
+                continue;
+            }
+
+            float sum = 0f;
+            foreach (Branch b in tree[i].children)
+                sum += Mathf.Pow(b.size, reverseGrowthFactor);
+
+            tree[i].size = Mathf.Pow(sum, inverseFactor);
+        }
+    }
+
+    public void CreateMesh()
+    {
+        filter = GetComponent<MeshFilter>();
+        treeMesh = new Mesh();
+        treeMesh.name = "Tree Mesh";
+
+        ComputeBranchSizes();
+
         Vector3[] vertices = new Vector3[(tree.Count + 1) * cylinderSections];
         int[] triangles = new int[tree.Count * cylinderSections * 6];
 
-        // construction of the vertices 
+        // vertices construction 
         for (int i = 0; i < tree.Count; i++)
         {
             Branch b = tree[i];
@@ -192,7 +228,7 @@ public class TreeGenerator : MonoBehaviour
                 float alpha = ((float)s / cylinderSections) * Mathf.PI * 2f;
 
                 // pos relative to vertical branch
-                Vector3 pos = new Vector3(Mathf.Cos(alpha) * meshRadius, 0, Mathf.Sin(alpha) * meshRadius);
+                Vector3 pos = new Vector3(Mathf.Cos(alpha) * b.size, 0, Mathf.Sin(alpha) * b.size);
                 pos = quat * pos; // rotation from branch to get position relative to actual branch
                 pos += b.end; // translation to the end point of the branch, relative to local object
                 // vertices must be aligned on global origin, we take it out of the local space
@@ -201,7 +237,7 @@ public class TreeGenerator : MonoBehaviour
                 // if this is the tree root, vertices of the base are added at the end of the array 
                 if (b.parent == null)
                 {
-                    vertices[tree.Count * cylinderSections + s] = b.start + new Vector3(Mathf.Cos(alpha) * meshRadius, 0, Mathf.Sin(alpha) * meshRadius) - transform.position;
+                    vertices[tree.Count * cylinderSections + s] = b.start + new Vector3(Mathf.Cos(alpha) * b.size, 0, Mathf.Sin(alpha) * b.size) - transform.position;
                 }
             }
         }
@@ -209,7 +245,7 @@ public class TreeGenerator : MonoBehaviour
         // triangles construction
         for (int i = 0; i < tree.Count; i++)
         {
-            int triId = 
+            int triId = i * cylinderSections * 6; // we have 6 index for 6 vertices spread on 2 triangles
             int topIdStart = tree[i].verticesId;
             int botIdStart = 0; 
             
@@ -218,7 +254,42 @@ public class TreeGenerator : MonoBehaviour
             else
                 botIdStart = tree.Count * cylinderSections;
 
+            // construction of the faces triangles
+            for (int s = 0; s < cylinderSections; s++)
+            {
+                // the triangles 
+                triangles[triId + s * 6] = botIdStart + s;
+                triangles[triId + s * 6 + 1] = topIdStart + s;
+                triangles[triId + s * 6 + 3] = botIdStart + s;
 
+                if (s == cylinderSections - 1)
+                {
+                    // if last subdivision
+                    triangles[triId + s * 6 + 2] = topIdStart;
+                    triangles[triId + s * 6 + 4] = topIdStart;
+                    triangles[triId + s * 6 + 5] = botIdStart;
+                }
+                else
+                {
+                    triangles[triId + s * 6 + 2] = topIdStart + s + 1;
+                    triangles[triId + s * 6 + 4] = topIdStart + s + 1;
+                    triangles[triId + s * 6 + 5] = botIdStart + s + 1;
+                }
+            }
+
+        }
+        
+        // Set values in tree mesh
+        treeMesh.vertices = vertices;
+        treeMesh.triangles = triangles;
+        treeMesh.RecalculateNormals();
+        filter.mesh = treeMesh;
+
+        if (mat != null)
+        {
+            Renderer renderer = GetComponent<Renderer>();
+
+            renderer.sharedMaterial = mat;
         }
     }
 
@@ -260,6 +331,11 @@ class TreeGeneratorEditor : Editor
 
             EditorCoroutineUtility.StopCoroutine(genCoroutine);
         }
+        if (GUILayout.Button("Regen mesh"))
+        {
+            TreeGenerator gen = (TreeGenerator)target;
 
+            gen.CreateMesh();
+        }
     }
 }
