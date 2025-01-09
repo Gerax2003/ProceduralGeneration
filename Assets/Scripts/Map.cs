@@ -137,6 +137,8 @@ public class Map : MonoBehaviour
                     if(MapPoints[x,y,z]<=Threshold)
                     {
                         Gizmos.color = new Color(MapPoints[x, y, z],MapPoints[x, y, z],MapPoints[x, y, z]);
+                        if (Gizmos.color ==Color.black)
+                            continue;
                         Gizmos.DrawSphere(new Vector3(x,y,z),0.1f);
                     }
             }
