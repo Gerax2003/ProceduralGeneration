@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class Map : MonoBehaviour
 {
     private float[,,] EmptyMap = new float[0, 0, 0];
     public Vector3Int Dimensions = new Vector3Int(0,0,0);
     public float[,,] MapPoints = new float[0,0,0];
     private MeshFilter Mf;
+    private MeshCollider Mc;
     [SerializeField][Range(0f, 1f)] float Threshold = 1;
 
     private List<Vector3> Vertices = new List<Vector3>();
@@ -21,6 +22,7 @@ public class Map : MonoBehaviour
     {
         Dimensions = new Vector3Int(0,0,0);
         Mf = GetComponent<MeshFilter>();
+        Mc = GetComponent < MeshCollider>();
         StartCoroutine(UpdateMap());
     }
 
@@ -108,6 +110,7 @@ public class Map : MonoBehaviour
         mesh.RecalculateNormals();
 
         Mf.mesh = mesh;
+        Mc.sharedMesh = mesh;
     }
 
     // Update is called once per frame

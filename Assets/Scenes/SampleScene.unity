@@ -368,6 +368,7 @@ GameObject:
   - component: {fileID: 1305370932}
   - component: {fileID: 1305370935}
   - component: {fileID: 1305370934}
+  - component: {fileID: 1305370936}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -387,7 +388,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 818c4b0bad66d2e4cb34edcebfd433fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Dimensions: {x: 20, y: 5, z: 20}
+  Dimensions: {x: 40, y: 5, z: 40}
   Threshold: 0.5
   IsVisible: 0
 --- !u!4 &1305370933
@@ -454,6 +455,28 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1305370931}
+  m_Mesh: {fileID: 0}
+--- !u!64 &1305370936
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1305370931}
+  m_Material: {fileID: 13400000, guid: 3689054a081b9514b95fb4975ac672e6, type: 2}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
   m_Mesh: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
