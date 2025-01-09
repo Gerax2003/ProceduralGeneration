@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.WSA;
 
 [RequireComponent(typeof(TreeVolume), typeof(MeshFilter))]
 public class TreeGenerator : MonoBehaviour
@@ -12,6 +13,7 @@ public class TreeGenerator : MonoBehaviour
 
     List<Branch> tree = new List<Branch>();
 
+    // Generator Variables
     [SerializeField]
     int maxIter = 1000;
 
@@ -28,7 +30,12 @@ public class TreeGenerator : MonoBehaviour
     float stepTime = 0.1f;
 
     [SerializeField]
+    Vector3 startOffset = Vector3.zero;
+
+    // Mesh variables
+    [SerializeField]
     int cylinderSections = 6;
+
 
     [SerializeField]
     float endBranchRadius = 0.1f;
@@ -37,12 +44,10 @@ public class TreeGenerator : MonoBehaviour
     float reverseGrowthFactor = 1.5f;
 
     [SerializeField]
-    Vector3 startOffset = Vector3.zero;
-
-    [SerializeField]
     Material mat = null;
 
-    Mesh treeMesh;
+    [HideInInspector]
+    public Mesh treeMesh; // public for save in custom editor
 
     MeshFilter filter;
 
@@ -314,6 +319,8 @@ class TreeGeneratorEditor : Editor
 {
     EditorCoroutine genCoroutine;
 
+    string assetName = "";
+
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
@@ -336,6 +343,23 @@ class TreeGeneratorEditor : Editor
             TreeGenerator gen = (TreeGenerator)target;
 
             gen.CreateMesh();
+        }
+        assetName = GUILayout.TextField(assetName);
+        if (GUILayout.Button("Save mesh asset"))
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Meshes"))
+                AssetDatabase.CreateFolder("Assets", "Meshes");
+
+            if (!AssetDatabase.IsValidFolder("Assets/Meshes/TreeGen"))
+                AssetDatabase.CreateFolder("Assets/Meshes", "TreeGen");
+
+            TreeGenerator gen = (TreeGenerator)target;
+            if (assetName == "")
+                AssetDatabase.CreateAsset(gen.treeMesh, "Assets/Meshes/TreeGen/Tree" + Random.Range(0, 9999) + ".asset");
+            else
+                AssetDatabase.CreateAsset(gen.treeMesh, "Assets/Meshes/TreeGen/" + assetName + ".asset");
+
+            AssetDatabase.SaveAssets();
         }
     }
 }
