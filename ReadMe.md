@@ -35,7 +35,17 @@ Finally, Generate tree will start the tree's generation, resetting the volume's 
 
 ### Terrain Generation
 
-texte ici
+Terrain can be generated with a custom tool which uses marchin cube algorithm. This tool can be accessed in the Component -> Tool tab of the editor.
+This algorithm uses perlin noise as a height map to create a layer of points, this layer of point is then stored as a three dimentional matrix so that all the coordinates of our points are eaily accessible. Once the matrix generated the `map` script will itterate on small portions of it with a cubic filter hense the name Marching cube, each itteration will take each corners and check if one of our stored points correspond to the corner's coordinates, once all corners have been assessed the algorithm will make one of 256 possible patterns and thanks to it will generate triangles data according to the pattern's corners. Once all itterations are done the script all the triangles data are passed to a Mesh filter in order to generate a new mesh, additionally the same data is sent to a Mesh collider to generate the map's collisions.
+
+The generator uses:
+- A Vector3 for the map's dimentions (values have to be positive and above 0)
+- An Int for the map's seed
+- A float for the scale, the higher the value the more zoomed in the map will be
+- A map script which the user have to add themselves from the scene
+![MapGeneratorEditor](https://cdn.discordapp.com/attachments/414819735688052737/1328018907977482311/image.png?ex=67852d7d&is=6783dbfd&hm=90ac8e941927269b52967c13e879fab099dbea7d9740920f57d9bf8a65426c26&) 
+
+Once the map generated, the `map` script allows you to display the points that generated the map with the `Is Visible` boolean, enabling it will display colored gizmo spheres
 
 ## <h2 id="screens">Screenshots</h2>  
 
@@ -48,6 +58,12 @@ A tree procedurally generated
 A quick generation of a tree with 700 points  
 ![TreeGeneration](ReadMeResources/TreeGeneration.gif)  
 
+Generated map with `MapGenerator` parameters
+![MapResults](https://media.discordapp.net/attachments/784350140454141952/1326947816345698367/image.png?ex=678493b4&is=67834234&hm=844b06ac6a8c4bb77b53b8d7765dde770f923eafb7dda1c8e028b930def30c49&=&format=webp&quality=lossless)
+
+Visible map points with `Is Visible` boolean enabled
+![VisibleMapPoints](https://cdn.discordapp.com/attachments/414819735688052737/1328034143489097860/image.png?ex=67853bad&is=6783ea2d&hm=6fcf157f54ff4ba404f7718da26156bd417c94eb8dedb830444f78f7192ecf04&)
+
 ## <h2 id="references">Sources</h2>  
 
 ### Random Number Generator
@@ -55,4 +71,4 @@ A quick generation of a tree with 700 points
 
 ### Tree generator
 - [Ciphrd blog post](https://ciphrd.com/2019/09/11/generating-a-3d-growing-tree-using-a-space-colonization-algorithm/)
-- [Space colonization research paper, University of Calgary](https://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf)  
+- [Space colonization research paper, University of Calgary](https://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf)
